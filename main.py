@@ -119,10 +119,46 @@ def predict_image(image_path):
    plt.axis('off')
    plt.show()
 
+from tkinter import Tk, filedialog
 
+def give_image():
+    root = Tk()
+    root.withdraw()
 
+    file_path = filedialog.askopenfilename(
+        title="Select lung cancer image",
+        filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")]
+    )
 
-# 🚀 Test with a random image
+    if not file_path:
+        print("No file selected")
+        return None
+
+    img = Image.open(file_path).convert('RGB')  # 🔥 Convert to RGB
+    return img, file_path
+
+def Manual_test():
+    result = give_image()
+    if result == None:
+        return
+    img,img_path = result
+
+    img_resized = img.resize((224,224,))
+    img_array = np.array(img_resized).astype('float32') / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+
+    pred = model.predict(img_array)
+    pred_class = LE.inverse_transform([np.argmax(pred)])
+    confidence = np.max(pred)
+
+    print(f"Predicted class: {pred_class[0]} with confidence of {confidence:.2f}")
+
+    # Show image
+    plt.imshow(img)
+    plt.title(f"Predicted: {pred_class[0]} ({confidence:.2f})")
+    plt.axis('off')
+    plt.show()
+
 def test_with_random_image():
    img, category, img_name, total = get_random_image()
    print(f"Testing Random Image: {img_name} from category {category}")
@@ -148,7 +184,7 @@ def test_with_random_image():
    plt.show()
 
 
-
-test_with_random_image()
+Manual_test()
+#test_with_random_image()
 
 #test
